@@ -1,19 +1,17 @@
 (ns largest-rectangle)
 
 (defn filter-adjacent-heights-greater-than
-  [list-of-heights building-height]
+  [building-height list-of-heights]
   (take-while #(>= % building-height) list-of-heights))
 
 (defn building-heights
   [heights building-index]
   (if (= building-index (count heights))
     [building-index]
-    (let [building-height (nth heights building-index)
-          heights-before (reverse (take building-index heights))
-          heights-after  (drop building-index heights)
-          taller-adjacent-buildings (concat (filter-adjacent-heights-greater-than heights-before building-height)
-                                            (filter-adjacent-heights-greater-than heights-after building-height))]
-      taller-adjacent-buildings)))
+    (let [building-height      (nth heights building-index)
+          previous-buildings   (map (partial nth heights) (range (dec building-index) -1 -1))
+          subsequent-buildings (map (partial nth heights) (range building-index (count heights)))]
+      (mapcat (partial filter-adjacent-heights-greater-than building-height) [previous-buildings subsequent-buildings]))))
 
 (defn max-contiguous-area
   [heights]
@@ -26,5 +24,7 @@
           (let [buildings (building-heights heights index)]
             (recur (inc index) (max max-height (* building-height (count buildings))))))))))
 
+
 ;; (read-line)
-;; (println (max-contiguous-area (map #(Integer/parseInt %) (clojure.string/split (read-line) #" "))))
+;; (println (max-contiguous-area (vec (map #(Integer/parseInt %) (clojure.string/split (read-line) #" ")))))
+
